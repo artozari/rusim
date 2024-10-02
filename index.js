@@ -17,7 +17,7 @@ client.subscribe(topic, (err) => {
 });
 
     setInterval(() => {
-        for (let i = 0; i<20; i++) {
+        for (let i = 1; i<=5; i++) {
             client.publish(`${topic}${(i+1)}` , `${JSON.stringify(modJson(jsonfile,i))}`)
         }
     }, 3000)
