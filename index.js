@@ -40,6 +40,22 @@ client.subscribe(topic, (err) => {
     tableDataNew[3] = `Table ${valRandom}`;
     tableDataNew[5] = `t${valRandom.toString().padStart(2,"0")}`;
     tableDataNew[7] = "00:15:5d:25:"+ valRandom.toString().padStart(2,"0") +":bd_8021_9021";
+
+    let winningNumbersDataNew = [...jsonfile.winningNumbersData];
+    winningNumbersDataNew.pop();
+    winningNumbersDataNew.push([
+        72,
+        "2024-09-20T19:34:38.411Z",
+        69,
+        25,
+        19,
+        true,
+        true,
+        true,
+        null,
+        1
+      ]);
+
     let nuevoDataJason = {
       ...datajson,
       ts: new Date().getTime(),
