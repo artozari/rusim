@@ -2,7 +2,16 @@ const mqtt  = require("mqtt");
 const jsonfile = require("./jsondata.json");
 
 let client = mqtt.connect("ws://sielcondev01.site:9105");
-let topic = "sts/dashboard/local/CA_SLCN/ts";
+let topic = "sts/dashboard/local/CA_SLCN/Ms";
+let cantMesas = 12;
+let gameNumber = 1;
+
+// let arrayP=[4,5,4,3,2,5,7,3,0,6];
+// arrayP.pop();
+// arrayP.push(44);
+// arrayP.fill(33,1,6);
+// console.log(arrayP);
+
 
 client.on("connect", () => {
     console.log("Connected to MQTT Broker");
@@ -17,21 +26,30 @@ client.subscribe(topic, (err) => {
 });
 
     setInterval(() => {
-        for (let i = 1; i<=5; i++) {
-            client.publish(`${topic}${(i+1)}` , `${JSON.stringify(modJson(jsonfile,i))}`)
+        for (let i = 1; i<=cantMesas; i++) {
+            const message = JSON.stringify(modJson(jsonfile,i));
+            client.publish(`${topic}${(i)}`, message)
         }
+        gameNumber++;
     }, 3000)
     
-    
-function modJson(datajson,i) {
+    function modJson(datajson,i) {
+    let tableDataNew = [...jsonfile.tableData];
+    let valRandom = Math.floor(Math.random() * cantMesas) + 1;
+    tableDataNew[1] = valRandom;
+    tableDataNew[3] = `Table ${valRandom}`;
+    tableDataNew[5] = `t${valRandom.toString().padStart(2,"0")}`;
+    tableDataNew[7] = "00:15:5d:25:"+ valRandom.toString().padStart(2,"0") +":bd_8021_9021";
     let nuevoDataJason = {
-      ...datajson, 
-      ts:i,
-      gameNumber: Math.floor(Math.random() * 37),
-      configData: seleccionarAleatorio()
+      ...datajson,
+      ts: new Date().getTime(),
+      gameNumber:gameNumber,
+      tableData:tableDataNew,
+      configData: seleccionarAleatorio(),
+      WinningNumberData:jsonfile.winningNumbersData,
     };
-    return nuevoDataJason
-  }
+        return nuevoDataJason;
+    }
 
   function seleccionarAleatorio(){
     const valores = ['fr37', 'fr38', 'am38'];
