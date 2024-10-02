@@ -1,14 +1,11 @@
 const mqtt  = require("mqtt");
 const jsonfile = require("./jsondata.json");
 
-
-
 client = mqtt.connect("ws://sielcondev01.site:9105");
 topic = "sts/dashboard/local/CA_SLCN/ts";
 
 client.on("connect", () => {
     console.log("Connected to MQTT Broker");
-    client.publish(topic, ` Conectado`);
 });
 
 client.subscribe(topic, (err) => {
@@ -20,16 +17,16 @@ client.subscribe(topic, (err) => {
 });
 
     setInterval(() => {
-        for (let i = 0; i<20; i++) {
-            client.publish(`${topic}${(i+1)}` , `${JSON.stringify(modJson(jsonfile))}`)
+        for (let i = 1; i<=10; i++) {
+            client.publish(`${topic}${(i+1)}` , `${JSON.stringify(modJson(jsonfile,i))}`)
         }
     }, 3000)
     
     
-function modJson(datajson) {
+function modJson(datajson,i) {
     let nuevoDataJason = {
       ...datajson, 
-      ts:5,
+      ts:i,
       gameNumber: Math.floor(Math.random() * 37),
       configData: seleccionarAleatorio()
     };
