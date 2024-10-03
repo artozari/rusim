@@ -3,67 +3,96 @@ const jsonfile = require("./jsondata.json");
 
 let client = mqtt.connect("ws://sielcondev01.site:9105");
 let topic = "sts/dashboard/local/CA_SLCN/Ms";
-let cantMesas = 12;
+let intrvalToPublish = 3000; //*expresado en milisegundos
+let cantMesas = 3;
 let gameNumber = 1;
-
-// let arrayP=[4,5,4,3,2,5,7,3,0,6];
-// arrayP.pop();
-// arrayP.push(44);
-// arrayP.fill(33,1,6);
-// console.log(arrayP);
+let winningNumbersDataNew = [];
+let tableDataNew = [...jsonfile.tableData];
+let idDataBase = 1;
+let maxHistory = 5;
 
 
-client.on("connect", () => {
+
+winningNumbersDataNew = [[
+    idDataBase,
+    new Date().getTime(),
+    gameNumber,
+    Math.floor(Math.random() * 37),
+    Math.floor(Math.random() * 30)+10,
+    true,
+    true,
+    true,
+    null,
+    1
+]];
+
+const winningNumberArray = new Array(cantMesas);
+  for(let table=0; table<cantMesas; table++){
+    // winningNumberArray[table]=[...winningNumbersDataNew];
+    winningNumberArray[table]=[];
+  }
+
+  client.on("connect", () => {
     console.log("Connected to MQTT Broker");
-});
-
-client.subscribe(topic, (err) => {
+  });
+  
+  client.subscribe(topic, (err) => {
     if (err) {
-        console.error(`Error subscribing to topic ${topic}:`, err);
-        return;
+      console.error(`Error subscribing to topic ${topic}:`, err);
+      return;
     }
     console.log(`Subscribed to topic ${topic}`);   
-});
+  });
+  
 
-    setInterval(() => {
-        for (let i = 1; i<=cantMesas; i++) {
-            const message = JSON.stringify(modJson(jsonfile,i));
-            client.publish(`${topic}${(i)}`, message)
-        }
-        gameNumber++;
-    }, 3000)
+
+  setInterval(() => {
+    console.log(gameNumber);
+    for (let i = 1; i<=cantMesas; i++) {
+      const message = JSON.stringify(modJson(jsonfile,i));
+      client.publish(`${topic}${(i)}`, message)
+    }
+    gameNumber++;
+  }, intrvalToPublish)
+  
+  
+  function modJson(datajson,i) {
+    let currently = new Date().getTime();
     
-    function modJson(datajson,i) {
-    let tableDataNew = [...jsonfile.tableData];
-    let valRandom = Math.floor(Math.random() * cantMesas) + 1;
-    tableDataNew[1] = valRandom;
-    tableDataNew[3] = `Table ${valRandom}`;
-    tableDataNew[5] = `t${valRandom.toString().padStart(2,"0")}`;
-    tableDataNew[7] = "00:15:5d:25:"+ valRandom.toString().padStart(2,"0") +":bd_8021_9021";
+    tableDataNew[1] = i;
+    tableDataNew[3] = `Table ${i.toString().padStart(2,0)}`;
+    tableDataNew[5] = `t${i.toString().padStart(2,"0")}`;
+    tableDataNew[7] = "00:15:5d:25:"+ i.toString().padStart(2,"0") +":bd_8021_9021";
 
-    let winningNumbersDataNew = [...jsonfile.winningNumbersData];
-    winningNumbersDataNew.pop();
-    winningNumbersDataNew.push([
-        72,
-        "2024-09-20T19:34:38.411Z",
-        69,
-        25,
-        19,
+    if (winningNumberArray[i-1].length >= maxHistory) {
+      winningNumberArray[i-1].shift();
+    }
+
+
+    winningNumberArray[i-1].push([
+        idDataBase,
+        currently.toString(),
+        gameNumber,
+        Math.floor(Math.random() * 37),
+        Math.floor(Math.random() * 30)+10,
         true,
         true,
         true,
         null,
-        1
-      ]);
+        i]
+      );
+      idDataBase++;
+  
 
     let nuevoDataJason = {
       ...datajson,
-      ts: new Date().getTime(),
+      ts: currently,
       gameNumber:gameNumber,
       tableData:tableDataNew,
-      configData: seleccionarAleatorio(),
-      WinningNumberData:jsonfile.winningNumbersData,
+      // configData: seleccionarAleatorio(),
+      winningNumbersData:winningNumberArray[i-1],
     };
+    
         return nuevoDataJason;
     }
 
