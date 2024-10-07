@@ -4,16 +4,13 @@ const jsonfile = require("./jsondata.json");
 let client = mqtt.connect("ws://sielcondev01.site:9105");
 let topic = "sts/dashboard/local/CA_SLCN/Ms";
 let intrvalToPublish = 3000; //*expresado en milisegundos
-let cantMesas = 3;
+let cantMesas = 300;
 let gameNumber = 1;
-let winningNumbersDataNew = [];
 let tableDataNew = [...jsonfile.tableData];
 let idDataBase = 1;
 let maxHistory = 5;
 
-
-
-winningNumbersDataNew = [[
+let winningNumbersDataNew = [[
     idDataBase,
     new Date().getTime(),
     gameNumber,
