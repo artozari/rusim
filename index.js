@@ -3,12 +3,12 @@ const jsonfile = require("./jsondata.json");
 
 let client = mqtt.connect("ws://sielcondev01.site:9105");
 let topic = "sts/dashboard/local/CA_SLCN/Ms";
-let intrvalToPublish = 20000; //*expresado en milisegundos
+let intrvalToPublish = 11000; //expresado en milisegundos
 let cantMesas = 2;
 let gameNumber = 1;
 let tableDataNew = [...jsonfile.tableData];
 let idDataBase = 1;
-let maxHistory = 5;
+let maxHistory = 10;
 let sendOrNot = true;
 
 let winningNumbersDataNew = [[
@@ -48,7 +48,7 @@ const winningNumberArray = new Array(cantMesas);
     console.log(gameNumber);
     for (let i = 1; i<=cantMesas; i++) {
       sendOrNot = Math.random() < 0.5
-      if (sendOrNot) {
+      if (true) {
         const message = JSON.stringify(modJson(jsonfile,i));
         client.publish(`${topic}${(i)}`, message)
       }
