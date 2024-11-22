@@ -2,9 +2,9 @@ const mqtt = require("mqtt");
 const jsonfile = require("./jsondata.json");
 
 let client = mqtt.connect("ws://sielcondev01.site:9105");
-let topic = "sts/dashboard/local/CA_SLCN/Ms";
+let topic = "sts1/dashboard/local/CA_SLCN/Ms";
 let intrvalToPublish = 5000; //*expresado en milisegundos
-let cantMesas = 20;
+let cantMesas = 5;
 let gameNumber = 1;
 let tableDataNew = [...jsonfile.tableData];
 let idDataBase = 1;
@@ -31,11 +31,11 @@ client.subscribe(topic, (err) => {
 setInterval(() => {
   console.log(gameNumber);
   for (let i = 1; i <= cantMesas; i++) {
-    let sendOrNot = Math.random() < 0.5;
-    // sendOrNot = true;
+    // let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
+    let sendOrNot = true;//# Enviar siempre la cantidad establecida de mesas.
     if (sendOrNot) {
-      const message = JSON.stringify(modJson(jsonfile, i));
-      client.publish(`${topic}${i}`, message);
+        const message = JSON.stringify(modJson(jsonfile, i));
+        client.publish(`${topic}${i}`, message);
     }
   }
   gameNumber++;
@@ -49,6 +49,12 @@ function modJson(datajson, i) {
   tableDataNew[5] = `t${i.toString().padStart(2, "0")}`;
   tableDataNew[7] =
     "00:15:5d:25:" + i.toString().padStart(2, "0") + ":bd_8021_9021";
+  tableDataNew[8] = "positionX";
+  tableDataNew[9] = Math.floor(Math.random() * 500);
+  tableDataNew[10] = "positionY";
+  tableDataNew[11] = Math.floor(Math.random() * 250);
+  tableDataNew[12] = "semaforo";
+  tableDataNew[13] = Math.floor(Math.random() * 3);
 
   if (winningNumberArray[i - 1].length >= maxHistory) {
     winningNumberArray[i - 1].shift();
