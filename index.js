@@ -57,10 +57,10 @@ function modJson(datajson, i) {
   tableDataNew[13] = Math.floor(Math.random() * 3);
 
   if (winningNumberArray[i - 1].length >= maxHistory) {
-    winningNumberArray[i - 1].shift();
+    winningNumberArray[i - 1].pop();
   }
 
-  winningNumberArray[i - 1].push([
+  winningNumberArray[i - 1].unshift([
     idDataBase,
     currently.toString(),
     gameNumber,
