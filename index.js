@@ -3,12 +3,15 @@ const jsonfile = require("./jsondata.json");
 
 let client = mqtt.connect("ws://sielcondev01.site:9105");
 let topic = "sts1/dashboard/local/CA_SLCN/Ms";
-let intrvalToPublish = 5000; //*expresado en milisegundos
-let cantMesas = 5;
+let intrvalToPublish = 3000; //*expresado en milisegundos
+let cantMesas = 12;
 let gameNumber = 1;
 let tableDataNew = [...jsonfile.tableData];
+let configDataNew = [...jsonfile.configData];
 let idDataBase = 1;
 let maxHistory = 150;
+let x = 0;
+let y = 0;
 
 const winningNumberArray = new Array(cantMesas);
 for (let table = 0; table < cantMesas; table++) {
@@ -18,6 +21,10 @@ for (let table = 0; table < cantMesas; table++) {
 
 client.on("connect", () => {
   console.log("Connected to MQTT Broker");
+});
+
+client.on("error", (err) => {
+  console.error("MQTT Error:", err);
 });
 
 client.subscribe(topic, (err) => {
@@ -32,10 +39,18 @@ setInterval(() => {
   console.log(gameNumber);
   for (let i = 1; i <= cantMesas; i++) {
     // let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
-    let sendOrNot = true;//# Enviar siempre la cantidad establecida de mesas.
+    let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
     if (sendOrNot) {
-        const message = JSON.stringify(modJson(jsonfile, i));
-        client.publish(`${topic}${i}`, message);
+      const message = JSON.stringify(modJson(jsonfile, i));
+      client.publish(`${topic}${i}`, message);
+    }
+    x = x + 105;
+    if (x >= 630) {
+      x = 0;
+      y = y + 150;
+    }
+    if (y >= 300) {
+      y = 0;
     }
   }
   gameNumber++;
@@ -50,11 +65,14 @@ function modJson(datajson, i) {
   tableDataNew[7] =
     "00:15:5d:25:" + i.toString().padStart(2, "0") + ":bd_8021_9021";
   tableDataNew[8] = "positionX";
-  tableDataNew[9] = Math.floor(Math.random() * 500);
+  tableDataNew[9] = x;
   tableDataNew[10] = "positionY";
-  tableDataNew[11] = Math.floor(Math.random() * 250);
-  tableDataNew[12] = "semaforo";
+  tableDataNew[11] = y;
+  tableDataNew[12] = "status";
   tableDataNew[13] = Math.floor(Math.random() * 3);
+
+  configDataNew[32] = "status";
+  configDataNew[33] = "red";
 
   if (winningNumberArray[i - 1].length >= maxHistory) {
     winningNumberArray[i - 1].pop();
@@ -79,6 +97,7 @@ function modJson(datajson, i) {
     ts: currently,
     gameNumber: gameNumber,
     tableData: tableDataNew,
+    configData: configDataNew,
     winningNumbersData: winningNumberArray[i - 1],
   };
 
@@ -90,3 +109,7 @@ function seleccionarAleatorio() {
   const indiceAleatorio = Math.floor(Math.random() * valores.length);
   return valores[indiceAleatorio];
 }
+
+client.on("message", (topic, message) => {
+  console.log(`Received message on topic ${topic}: ${message.toString()}`);
+});
