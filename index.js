@@ -4,7 +4,7 @@ const jsonfile = require("./jsondata.json");
 let client = mqtt.connect("ws://sielcondev01.site:9105");
 let topic = "sts1/dashboard/local/CA_SLCN/Ms";
 let intrvalToPublish = 3000; //*expresado en milisegundos
-let cantMesas = 12;
+let cantMesas = 5; //# La cantidad de mesas a publicar
 let gameNumber = 1;
 let tableDataNew = [...jsonfile.tableData];
 let configDataNew = [...jsonfile.configData];
@@ -68,11 +68,10 @@ function modJson(datajson, i) {
   tableDataNew[9] = x;
   tableDataNew[10] = "positionY";
   tableDataNew[11] = y;
-  tableDataNew[12] = "status";
-  tableDataNew[13] = Math.floor(Math.random() * 3);
 
+  configDataNew[3] = i;
   configDataNew[32] = "status";
-  configDataNew[33] = "red";
+  configDataNew[33] = seleccionarColorAleatorio();
 
   if (winningNumberArray[i - 1].length >= maxHistory) {
     winningNumberArray[i - 1].pop();
@@ -109,6 +108,13 @@ function seleccionarAleatorio() {
   const indiceAleatorio = Math.floor(Math.random() * valores.length);
   return valores[indiceAleatorio];
 }
+function seleccionarColorAleatorio() {
+  const valores = ["red", "green", "yellow"];
+  const indiceAleatorio = Math.floor(Math.random() * valores.length);
+  return valores[indiceAleatorio];
+}
+
+
 
 client.on("message", (topic, message) => {
   console.log(`Received message on topic ${topic}: ${message.toString()}`);
