@@ -6,6 +6,8 @@ let topic = "sts1/dashboard/local/CA_SLCN/Ms";
 let intrvalToPublish = 3000; //*expresado en milisegundos
 let cantMesas = 5; //# La cantidad de mesas a publicar
 let gameNumber = 1;
+let cantPlanos = 3;
+let layout = 0;
 let tableDataNew = [...jsonfile.tableData];
 let configDataNew = [...jsonfile.configData];
 let status = [];
@@ -43,6 +45,11 @@ setInterval(() => {
     // let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
     let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
     if (sendOrNot) {
+      if (i <= 2) {
+        layout = 1;
+      } else {
+        layout = 2;
+      }
       const message = JSON.stringify(modJson(jsonfile, i));
       client.publish(`${topic}${i}`, message);
     }
@@ -74,17 +81,17 @@ function modJson(datajson, i) {
   tableDataNew[10] = "positionY";
   tableDataNew[11] = y;
   tableDataNew[12] = "layout";
-  tableDataNew[13] = 0;
+  tableDataNew[13] = layout;
   tableDataNew[14] = "noSmoking";
   tableDataNew[15] = true;
 
   configDataNew[3] = i;
-  configDataNew[32] = "Language";
+  configDataNew[32] = "language";
   configDataNew[33] = "es";
-  configDataNew[34] = "Language-2";
+  configDataNew[34] = "language2";
   configDataNew[35] = "en";
-  configDataNew[36] = "Language-3";
-  configDataNew[37] = "off";
+  configDataNew[36] = "language3";
+  configDataNew[37] = "OFF";
 
   status[0] = "semaphore";
   status[1] = seleccionarColorAleatorio();
