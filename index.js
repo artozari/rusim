@@ -2,9 +2,9 @@ const mqtt = require("mqtt");
 const jsonfile = require("./jsondata.json");
 
 let client = mqtt.connect("ws://sielcondev01.site:9105");
-let topic = "sts1/dashboard/local/CA_SLCN/Ms";
+let topic = "sts/dashboard/local/CA_SLCNSist/Ms";
 let intrvalToPublish = 3000; //*expresado en milisegundos
-let cantMesas = 5; //# La cantidad de mesas a publicar
+let cantMesas = 50; //# La cantidad de mesas a publicar
 let gameNumber = 1;
 let cantPlanos = 3;
 let layout = 0;
@@ -16,11 +16,28 @@ let idDataBase = 1;
 let maxHistory = 150;
 let x = 0;
 let y = 0;
+let positions = generatePositions(cantMesas);
+console.log(positions);
+
 
 const winningNumberArray = new Array(cantMesas);
 for (let table = 0; table < cantMesas; table++) {
-  // winningNumberArray[table]=[...winningNumbersDataNew];
   winningNumberArray[table] = [];
+}
+
+function generatePositions(cantMesas) {
+  let positions = [];
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < cantMesas; i++) {
+    positions.push([x, y]);
+    x += 105;
+    if (x > 800) {
+      x = 0;
+      y += 130;
+    }
+  }
+  return positions;
 }
 
 client.on("connect", () => {
@@ -42,8 +59,8 @@ client.subscribe(topic, (err) => {
 setInterval(() => {
   console.log(gameNumber);
   for (let i = 1; i <= cantMesas; i++) {
-    // let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
-    let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
+    let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
+    // let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
     if (sendOrNot) {
       if (i <= 2) {
         layout = 1;
@@ -69,29 +86,31 @@ function modJson(datajson, i) {
   let currently = Date.now();
 
   casinoDataNew[14] = "cantPlanos";
-  casinoDataNew[15] = Math.floor(Math.random() * 3) + 1;
+  casinoDataNew[15] = Math.floor(Math.random() * 2) + 1;
 
   tableDataNew[1] = i;
   tableDataNew[3] = `Table ${i.toString().padStart(2, 0)}`;
   tableDataNew[5] = `t${i.toString().padStart(2, "0")}`;
-  tableDataNew[7] =
+  tableDataNew[6] = `tableNumber`;
+  tableDataNew[7] = i;
+  tableDataNew[8] = "key";
+  tableDataNew[9] =
     "00:15:5d:25:" + i.toString().padStart(2, "0") + ":bd_8021_9021";
-  tableDataNew[8] = "positionX";
-  tableDataNew[9] = x;
-  tableDataNew[10] = "positionY";
-  tableDataNew[11] = y;
-  tableDataNew[12] = "layout";
-  tableDataNew[13] = layout;
-  tableDataNew[14] = "noSmoking";
-  tableDataNew[15] = true;
+  tableDataNew[10] = "positionX";
+  tableDataNew[11] = positions[i-1][0];
+  tableDataNew[12] = "positionY";
+  tableDataNew[13] = positions[i-1][1];
+  tableDataNew[14] = "layout";
+  tableDataNew[15] = layout;
+  tableDataNew[16] = "noSmoking";
+  tableDataNew[17] = true;
 
-  configDataNew[3] = i;
-  configDataNew[32] = "language";
-  configDataNew[33] = "es";
-  configDataNew[34] = "language2";
-  configDataNew[35] = "en";
-  configDataNew[36] = "language3";
-  configDataNew[37] = "OFF";
+  configDataNew[30] = "language";
+  configDataNew[31] = "es";
+  configDataNew[32] = "language2";
+  configDataNew[33] = "en";
+  configDataNew[34] = "language3";
+  configDataNew[35] = "OFF";
 
   status[0] = "semaphore";
   status[1] = seleccionarColorAleatorio();

@@ -3,9 +3,9 @@
     "gameNumber": 69,
     "casinoData": [ 
         "casinoCode",
-        "CA_SLCN",
+        "CA_SLCNSist",
         "name",
-        "Casino Sielcon",
+        "Casino SielconSist",
         "country",
         "ARG",
         "province",
@@ -30,8 +30,6 @@
     "configData": [
         "wheelType",
         "FR37", 
-        "tableNumber",
-        5,
         "skyn",
         "SKIN_F1",
         "chip",
