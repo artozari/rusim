@@ -4,7 +4,7 @@ const jsonfile = require("./jsondata.json");
 let client = mqtt.connect("ws://sielcondev01.site:9105");
 let topic = "sts/dashboard/local/CA_SLCNSist/Ms";
 let intrvalToPublish = 3000; //*expresado en milisegundos
-let cantMesas = 50; //# La cantidad de mesas a publicar
+let cantMesas = 5; //# La cantidad de mesas a publicar
 let gameNumber = 1;
 let cantPlanos = 3;
 let layout = 0;
@@ -18,7 +18,6 @@ let x = 0;
 let y = 0;
 let positions = generatePositions(cantMesas);
 console.log(positions);
-
 
 const winningNumberArray = new Array(cantMesas);
 for (let table = 0; table < cantMesas; table++) {
@@ -59,8 +58,8 @@ client.subscribe(topic, (err) => {
 setInterval(() => {
   console.log(gameNumber);
   for (let i = 1; i <= cantMesas; i++) {
-    let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
-    // let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
+    // let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
+    let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
     if (sendOrNot) {
       if (i <= 2) {
         layout = 1;
@@ -97,9 +96,9 @@ function modJson(datajson, i) {
   tableDataNew[9] =
     "00:15:5d:25:" + i.toString().padStart(2, "0") + ":bd_8021_9021";
   tableDataNew[10] = "positionX";
-  tableDataNew[11] = positions[i-1][0];
+  tableDataNew[11] = positions[i - 1][0];
   tableDataNew[12] = "positionY";
-  tableDataNew[13] = positions[i-1][1];
+  tableDataNew[13] = positions[i - 1][1];
   tableDataNew[14] = "layout";
   tableDataNew[15] = layout;
   tableDataNew[16] = "noSmoking";
