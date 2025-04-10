@@ -4,7 +4,7 @@ const jsonfile = require("./jsondata.json");
 let client = mqtt.connect("ws://sielcondev01.site:9105");
 let topic = "sts/dashboard/local/CA_SLCNSist/Ms";
 let intrvalToPublish = 3000; //*expresado en milisegundos
-let cantMesas = 10 //# La cantidad de mesas a publicar
+let cantMesas = 5; //# La cantidad de mesas a publicar
 let gameNumber = 1;
 let cantPlanos = 3;
 let layout = 0;
@@ -93,8 +93,7 @@ function modJson(datajson, i) {
   tableDataNew[6] = `tableNumber`;
   tableDataNew[7] = i;
   tableDataNew[8] = "key";
-  tableDataNew[9] =
-    "00:15:5d:25:" + i.toString().padStart(2, "0") + ":bd_8021_9021";
+  tableDataNew[9] = "00:15:5d:25:" + i.toString().padStart(2, "0") + ":bd_8021_9021";
   tableDataNew[10] = "positionX";
   tableDataNew[11] = positions[i - 1][0];
   tableDataNew[12] = "positionY";
