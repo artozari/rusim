@@ -121,7 +121,7 @@ function modJson(datajson, i) {
     idDataBase,
     currently.toString(),
     gameNumber,
-    Math.floor(Math.random() * 37),
+    Math.floor(Math.random() * 38),
     Math.floor(Math.random() * 30) + 10,
     true,
     true,
