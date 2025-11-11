@@ -1,8 +1,8 @@
 const mqtt = require("mqtt");
 const jsonfile = require("./jsondata.json");
 
-let client = mqtt.connect("ws://sielcondev01.site:9105");
-let topic = "sts/dashboard/local/CA_SLCNSist/Ms";
+let client = mqtt.connect("ws://dev01.sielcon.net:9105");
+let topic = "stsAngel/dashboard/local/CA_SLCNSist/Ms";
 let intrvalToPublish = 3000; //*expresado en milisegundos
 let cantMesas = 5; //# La cantidad de mesas a publicar
 let gameNumber = 1;
@@ -117,18 +117,7 @@ function modJson(datajson, i) {
     winningNumberArray[i - 1].pop();
   }
 
-  winningNumberArray[i - 1].unshift([
-    idDataBase,
-    currently.toString(),
-    gameNumber,
-    Math.floor(Math.random() * 38),
-    Math.floor(Math.random() * 30) + 10,
-    true,
-    true,
-    true,
-    null,
-    i,
-  ]);
+  winningNumberArray[i - 1].unshift([idDataBase, currently.toString(), gameNumber, Math.floor(Math.random() * 38), Math.floor(Math.random() * 30) + 10, true, true, true, null, i]);
   idDataBase++;
 
   let nuevoDataJason = {
