@@ -1,10 +1,14 @@
 const mqtt = require("mqtt");
 const jsonfile = require("./jsondata.json");
+const jsonfileConfig = require("./jsonConfig.json");
 
 let client = mqtt.connect("ws://dev01.sielcon.net:9105");
-let topic = "stsAngel/dashboard/local/CA_SLCNSist/Ms";
-let intrvalToPublish = 3000; //*expresado en milisegundos
+let topicGame = "SimuSts/STS-Casino/Cli/Game";
+let topicConfig = "SimuSts/STS-Casino/Cli/Config";
+let intrvalToPublishGame = 3000; //*expresado en milisegundos
+let intrvalToPublishConfig = 0; //*expresado en milisegundos
 let cantMesas = 5; //# La cantidad de mesas a publicar
+
 let gameNumber = 1;
 let cantPlanos = 3;
 let layout = 0;
@@ -47,39 +51,49 @@ client.on("error", (err) => {
   console.error("MQTT Error:", err);
 });
 
-client.subscribe(topic, (err) => {
+client.subscribe(topicGame, (err) => {
   if (err) {
-    console.error(`Error subscribing to topic ${topic}:`, err);
+    console.error(`Error subscribing to topic ${topicGame}:`, err);
     return;
   }
-  console.log(`Subscribed to topic ${topic}`);
+  console.log(`Subscribed to topic ${topicGame}`);
 });
 
-setInterval(() => {
-  console.log(gameNumber);
-  for (let i = 1; i <= cantMesas; i++) {
-    // let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
-    let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
-    if (sendOrNot) {
-      if (i <= 2) {
-        layout = 1;
-      } else {
-        layout = 2;
-      }
-      const message = JSON.stringify(modJson(jsonfile, i));
-      client.publish(`${topic}${i}`, message);
-    }
-    x = x + 105;
-    if (x >= 630) {
-      x = 0;
-      y = y + 150;
-    }
-    if (y >= 300) {
-      y = 0;
-    }
+client.subscribe(topicConfig, (err) => {
+  if (err) {
+    console.error(`Error subscribing to topic ${topicConfig}:`, err);
+    return;
   }
-  gameNumber++;
-}, intrvalToPublish);
+  console.log(`Subscribed to topic ${topicConfig}`);
+});
+
+if (intrvalToPublishGame > 0 && cantMesas > 0) {
+  setInterval(() => {
+    console.log("gameNumber", gameNumber);
+    for (let i = 1; i <= cantMesas; i++) {
+      // let sendOrNot = Math.random() < 0.5;//# para enviar mesas de forma aleatoria.
+      let sendOrNot = true; //# Enviar siempre la cantidad establecida de mesas.
+      if (sendOrNot) {
+        if (i <= 2) {
+          layout = 1;
+        } else {
+          layout = 2;
+        }
+        const message = JSON.stringify(modJson(jsonfile, i));
+        client.publish(`${topicGame}`, JSON.stringify(JSON.parse(message).winningNumbersData[0]));
+      }
+      x = x + 105;
+      if (x >= 630) {
+        x = 0;
+        y = y + 150;
+      }
+      if (y >= 300) {
+        y = 0;
+      }
+    }
+    gameNumber++;
+  }, intrvalToPublishGame);
+}
 
 function modJson(datajson, i) {
   let currently = Date.now();
@@ -145,6 +159,32 @@ function seleccionarColorAleatorio() {
   return valores[indiceAleatorio];
 }
 
-client.on("message", (topic, message) => {
-  console.log(`Received message on topic ${topic}: ${message.toString()}`);
-});
+//--> Publish configData at regular intervals
+
+if (intrvalToPublishConfig > 0) {
+  setInterval(() => {
+    console.log("configData");
+    client.publish(topicConfig, JSON.stringify(jsonfileConfig));
+  }, intrvalToPublishConfig);
+}
+
+//--> Publish gameData at random intervals
+let rnd = Math.floor(Math.random() * (10000 - 5000)) + 5000;
+// let st = setTimeout(sengGames, rnd);
+console.log(rnd);
+
+function sengGames() {
+  const message = modJson(jsonfile, 1).winningNumbersData[0];
+  client.publish(topicGame, JSON.stringify(message), { qos: 1 }, (err) => {
+    if (err) console.error("Error publishing to topic", topicConfig, ":", err);
+    else console.log("datos enviado al tópico", topicConfig, ":", message);
+  });
+  newTimeOut(10000);
+}
+
+function newTimeOut(intervalo = 30000) {
+  if (st !== null) {
+    clearInterval(st);
+  }
+  st = setTimeout(sengGames, intervalo);
+}
