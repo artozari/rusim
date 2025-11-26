@@ -2,6 +2,31 @@ const mqtt = require("mqtt");
 const jsonfile = require("./jsondata.json");
 const jsonfileConfig = require("./jsonConfig.json");
 
+const pino = require("pino");
+const logger = pino({
+  customLevels: {
+    infoTest: 35, // Define el nivel personalizado con un valor numérico
+  },
+  level: "trace", // Establece el nivel de registro global
+  transport: {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+      translateTime: "SYS:standard",
+      ignore: "pid,hostname",
+      messageKey: "message",
+    },
+  },
+});
+
+logger.info("Starting MQTT Client...");
+logger.error("This is an error message example");
+logger.debug("This is a debug message example");
+logger.warn("This is a warning message example");
+logger.trace("This is a trace message example");
+logger.fatal("This is a fatal message example");
+logger.infoTest("This is a silly message example");
+
 let client = mqtt.connect("ws://dev01.sielcon.net:9105");
 let topicGame = "SimuSts/STS-Casino/Cli/Game";
 let topicConfig = "SimuSts/STS-Casino/Cli/Config";
@@ -186,5 +211,5 @@ function newTimeOut(intervalo = 30000) {
   if (st !== null) {
     clearInterval(st);
   }
-  st = setTimeout(sengGames, intervalo);
+  let st = setTimeout(sengGames, intervalo);
 }

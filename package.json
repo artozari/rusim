@@ -12,9 +12,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "mqtt": "^5.10.1"
+    "mqtt": "^5.10.1",
+    "pino": "^10.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "pino-pretty": "^13.1.2"
   }
 }
