@@ -202,23 +202,23 @@ client.on("message", (topic, message) => {
 });
 
 function sendGames() {
-  client.publish(topicGame + "/1", JSON.stringify(jsonOriginal.winningNumbersData.reverse()), { qos: 1 }, (err) => {
+  client.publish(topicGame + "/1", JSON.stringify(jsonOriginal.winningNumbersData), { qos: 1 }, (err) => {
     if (err) console.error("Error publishing to topic", topicGame + "1", ":", err);
     else console.log("datos enviado al tópico", topicGame + "1");
   });
 }
-//==>
 
 function newTimeOut(intervalo = 30000) {
   if (st !== null) {
-    clearInterval(st);
+    clearTimeout(st);
   }
   st = setTimeout(sengGame, intervalo);
 }
 
 function updateJsonData(json) {
-  jsonOriginal.winningNumbersData.unshift(json);
-  // Guardar los cambios en el archivo
+  let lengthJson = jsonOriginal.winningNumbersData.unshift(json);
+  // console.log(lengthJson);
+
   fs.writeFileSync("./jsonOriginal.json", JSON.stringify(jsonOriginal, null, 2));
   console.log("Archivo jsonOriginal.json actualizado");
 }
