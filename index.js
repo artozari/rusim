@@ -1,38 +1,16 @@
 const mqtt = require("mqtt");
 const jsonfile = require("./jsondata.json");
 const jsonfileConfig = require("./jsonConfig.json");
-
-const pino = require("pino");
-const logger = pino({
-  customLevels: {
-    infoTest: 35, // Define el nivel personalizado con un valor numérico
-  },
-  level: "trace", // Establece el nivel de registro global
-  transport: {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-      translateTime: "SYS:standard",
-      ignore: "pid,hostname",
-      messageKey: "message",
-    },
-  },
-});
-
-logger.info("Starting MQTT Client...");
-logger.error("This is an error message example");
-logger.debug("This is a debug message example");
-logger.warn("This is a warning message example");
-logger.trace("This is a trace message example");
-logger.fatal("This is a fatal message example");
-logger.infoTest("This is a silly message example");
+const jsonOriginal = require("./jsonOriginal.json");
+const fs = require("fs");
 
 let client = mqtt.connect("ws://dev01.sielcon.net:9105");
 let topicGame = "SimuSts/STS-Casino/Cli/Game";
 let topicConfig = "SimuSts/STS-Casino/Cli/Config";
+let topicSrvGame = "SimuSts/STS-Casino/Srv/Game1";
 let intrvalToPublishGame = 3000; //*expresado en milisegundos
 let intrvalToPublishConfig = 0; //*expresado en milisegundos
-let cantMesas = 5; //# La cantidad de mesas a publicar
+let cantMesas = 1; //# La cantidad de mesas a publicar
 
 let gameNumber = 1;
 let cantPlanos = 3;
@@ -92,6 +70,14 @@ client.subscribe(topicConfig, (err) => {
   console.log(`Subscribed to topic ${topicConfig}`);
 });
 
+client.subscribe(topicSrvGame, (err) => {
+  if (err) {
+    console.error(`Error subscribing to topic ${topicSrvGame}:`, err);
+    return;
+  }
+  console.log(`Subscribed to topic ${topicSrvGame}`);
+});
+
 if (intrvalToPublishGame > 0 && cantMesas > 0) {
   setInterval(() => {
     console.log("gameNumber", gameNumber);
@@ -105,6 +91,7 @@ if (intrvalToPublishGame > 0 && cantMesas > 0) {
           layout = 2;
         }
         const message = JSON.stringify(modJson(jsonfile, i));
+        updateJsonData(JSON.parse(message).winningNumbersData[0]);
         client.publish(`${topicGame}`, JSON.stringify(JSON.parse(message).winningNumbersData[0]));
       }
       x = x + 105;
@@ -169,7 +156,6 @@ function modJson(datajson, i) {
     winningNumbersData: winningNumberArray[i - 1],
     status: status,
   };
-
   return nuevoDataJason;
 }
 
@@ -178,6 +164,7 @@ function seleccionarAleatorio() {
   const indiceAleatorio = Math.floor(Math.random() * valores.length);
   return valores[indiceAleatorio];
 }
+
 function seleccionarColorAleatorio() {
   const valores = ["red", "green", "yellow"];
   const indiceAleatorio = Math.floor(Math.random() * valores.length);
@@ -185,7 +172,6 @@ function seleccionarColorAleatorio() {
 }
 
 //--> Publish configData at regular intervals
-
 if (intrvalToPublishConfig > 0) {
   setInterval(() => {
     console.log("configData");
@@ -198,7 +184,7 @@ let rnd = Math.floor(Math.random() * (10000 - 5000)) + 5000;
 // let st = setTimeout(sengGames, rnd);
 console.log(rnd);
 
-function sengGames() {
+function sengGame() {
   const message = modJson(jsonfile, 1).winningNumbersData[0];
   client.publish(topicGame, JSON.stringify(message), { qos: 1 }, (err) => {
     if (err) console.error("Error publishing to topic", topicConfig, ":", err);
@@ -207,9 +193,34 @@ function sengGames() {
   newTimeOut(10000);
 }
 
+//==> Manejar mensajes entrantes de juegos faltantes en Sala
+client.on("message", (topic, message) => {
+  if (topic === topicSrvGame) {
+    sendGames();
+    console.log("Mensaje recibido en el tópico", topic, ":", message.toString());
+  }
+});
+
+function sendGames() {
+  client.publish(topicGame + "/1", JSON.stringify(jsonOriginal.winningNumbersData.reverse()), { qos: 1 }, (err) => {
+    if (err) console.error("Error publishing to topic", topicGame + "1", ":", err);
+    else console.log("datos enviado al tópico", topicGame + "1");
+  });
+}
+//==>
+
 function newTimeOut(intervalo = 30000) {
   if (st !== null) {
     clearInterval(st);
   }
-  let st = setTimeout(sengGames, intervalo);
+  st = setTimeout(sengGame, intervalo);
 }
+
+function updateJsonData(json) {
+  jsonOriginal.winningNumbersData.unshift(json);
+  // Guardar los cambios en el archivo
+  fs.writeFileSync("./jsonOriginal.json", JSON.stringify(jsonOriginal, null, 2));
+  console.log("Archivo jsonOriginal.json actualizado");
+}
+
+// updateJsonData();
