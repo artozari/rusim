@@ -196,13 +196,13 @@ function sengGame() {
 //==> Manejar mensajes entrantes de juegos faltantes en Sala
 client.on("message", (topic, message) => {
   if (topic === topicSrvGame) {
-    sendGames();
+    sendGames(topic.last_game_registered);
     console.log("Mensaje recibido en el tópico", topic, ":", message.toString());
   }
 });
 
-function sendGames() {
-  client.publish(topicGame + "/1", JSON.stringify(jsonOriginal.winningNumbersData), { qos: 1 }, (err) => {
+function sendGames(lastGameRegistered) {
+  client.publish(topicGame + "/1", JSON.stringify(jsonOriginal.winningNumbersData.slice().reverse()), { qos: 1 }, (err) => {
     if (err) console.error("Error publishing to topic", topicGame + "1", ":", err);
     else console.log("datos enviado al tópico", topicGame + "1");
   });
